@@ -21,7 +21,7 @@ spec:
           emptyDir: {}
       containers:
         - name: simple-flask
-          image: fureasu346/simple-flask:v1
+          image: fureasu346/simple-flask:1.0.1
           env:
             - name: APP_PORT
               value: "5080"
