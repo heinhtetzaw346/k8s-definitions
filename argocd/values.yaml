@@ -1,0 +1,26 @@
+repoServer:
+  extraContainers:
+    - name: sops-helm-plugin
+      image: fureasu346/argocd-soap-helm-cmp:v1
+      command: [/var/run/argocd/argocd-cmp-server]
+      imagePullPolicy: Always
+      env:
+        - name: SOPS_AGE_KEY_FILE
+          value: /helm-secrets-private-keys/key.txt
+        - name: SOAP_HELM_REPO_TOKEN
+          value: "token"
+      volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+        - mountPath: /helm-secrets-private-keys/
+          name: helm-secrets-private-keys
+        - mountPath: /tmp
+          name: cmp-tmp
+  volumes:
+    - emptyDir: {}
+      name: cmp-tmp
+    - name: helm-secrets-private-keys
+      secret:
+        secretName: helm-secrets-private-keys
