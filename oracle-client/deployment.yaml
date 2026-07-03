@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oracle-client-config
+data:
+  config.yaml: |
+    oracle_db:
+      ip: "YOUR_ORACLE_DB_IP"
+      port: 1521
+      dbname: "YOUR_DB_NAME"
+      username: "YOUR_USERNAME"
+      password: "YOUR_PASSWORD"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oracle-client
+  labels:
+    app: oracle-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oracle-client
+  template:
+    metadata:
+      labels:
+        app: oracle-client
+    spec:
+      containers:
+      - name: oracle-client
+        image: mirror.gcr.io/fureasu346/oracle-client:latest
+        imagePullPolicy: IfNotPresent
+        command: ["sleep", "infinity"]
+        env:
+        - name: CONFIG_PATH
+          value: /app/config.yaml
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config.yaml
+          subPath: config.yaml
+      volumes:
+      - name: config-volume
+        configMap:
+          name: oracle-client-config
