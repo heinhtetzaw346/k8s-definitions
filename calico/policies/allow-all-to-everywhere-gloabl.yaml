@@ -1,0 +1,14 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: allow-all-to-everywhere
+spec:
+  order: 200
+  selector: all()
+  types:
+  - Egress
+  - Ingress
+  egress:
+  - action: Allow
+  ingress:
+  - action: Allow

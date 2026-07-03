@@ -1,0 +1,18 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: allow-utility-to-db
+spec:
+  egress:
+  - action: Allow
+    destination:
+      nets:
+      - 192.168.128.42/32
+      ports:
+      - 3306
+    protocol: TCP
+  order: 100
+  selector:
+    app == "utility"
+  types:
+  - Egress

@@ -1,0 +1,15 @@
+apiVersion: crd.projectcalico.org/v1
+kind: GlobalNetworkPolicy
+metadata:
+  name: deny-access-to-db
+spec:
+  order: 190
+  selector: all()
+  types:
+  - Egress
+  egress:
+  - action: Deny
+    protocol: TCP
+    destination:
+      nets:
+        - 192.168.128.42/32
