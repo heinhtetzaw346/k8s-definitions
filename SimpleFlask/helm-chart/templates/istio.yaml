@@ -1,0 +1,72 @@
+{{- if .Values.istio.enabled }}
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "simple-flask.fullname" . }}
+  labels:
+    {{- include "simple-flask.labels" . | nindent 4 }}
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    {{- if .Values.istio.tls.enabled }}
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: {{ .Values.istio.tls.credentialName }}
+      hosts:
+        - {{ .Values.istio.host | quote }}
+    {{- else }}
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - {{ .Values.istio.host | quote }}
+    {{- end }}
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: {{ include "simple-flask.fullname" . }}
+  labels:
+    {{- include "simple-flask.labels" . | nindent 4 }}
+spec:
+  hosts:
+    - {{ .Values.istio.host | quote }}
+  gateways:
+    - {{ include "simple-flask.fullname" . }}
+  http:
+    - route:
+      - destination:
+          {{- if .Values.istio.tls.enabled }}
+          host: {{ include "simple-flask.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+          {{- else }}
+          host: {{ include "simple-flask.fullname" . }}
+          {{- end }}
+          port:
+            number: {{ .Values.service.port }}
+---
+{{- if .Values.istio.stickySession.enabled }}
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: {{ include "simple-flask.fullname" . }}
+  labels:
+    {{- include "simple-flask.labels" . | nindent 4 }}
+spec:
+  host: {{ include "simple-flask.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpCookie:
+          name: {{ .Values.istio.stickySession.cookieName }}
+          {{- if eq .Values.istio.stickySession.mode "new-cookie" }}
+          ttl: 0s
+          path: /
+          {{- end }}
+{{- end }}
+{{- end }}

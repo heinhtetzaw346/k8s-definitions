@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "simple-flask.fullname" . }}
+  labels:
+    {{- include "simple-flask.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "simple-flask.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      name: {{ include "simple-flask.fullname" . }}
+      labels:
+        {{- include "simple-flask.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: app-data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "simple-flask.fullname" . }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      containers:
+        - name: {{ include "simple-flask.fullname" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: APP_PORT
+              value: "{{ .Values.app.port }}"
+            - name: APP_LOG_PATH
+              value: {{ .Values.app.logPath }}
+            - name: APP_DATA_PATH
+              value: {{ .Values.app.dataPath }}
+          volumeMounts:
+            - name: app-data
+              mountPath: /app-data
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.app.port }}
+      {{- if eq .Values.affinity "hard" }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - {{ include "simple-flask.fullname" . }}
+              topologyKey: "kubernetes.io/hostname"
+      {{- else if eq .Values.affinity "soft" }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - {{ include "simple-flask.fullname" . }}
+                topologyKey: "kubernetes.io/hostname"
+      {{- end }}

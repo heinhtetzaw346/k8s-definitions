@@ -1,0 +1,78 @@
+{{- if .Values.traefik.gateway.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: {{ include "simple-flask.fullname" . }}-gw
+  labels:
+    {{- include "simple-flask.labels" . | nindent 4 }}
+spec:
+  gatewayClassName: traefik
+  listeners:
+    - name: web
+      protocol: HTTP
+      port: {{ .Values.traefik.gateway.httpPort }}
+      hostname: {{ .Values.traefik.gateway.host | quote }}
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway: {{ include "simple-flask.fullname" . }}
+        kinds:
+          - kind: HTTPRoute
+    {{- if .Values.traefik.gateway.tls.enabled }}
+    - name: websecure
+      protocol: HTTPS
+      port: {{ .Values.traefik.gateway.httpsPort }}
+      hostname: {{ .Values.traefik.gateway.host | quote }}
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: {{ .Values.traefik.gateway.tls.secretName }}
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway: {{ include "simple-flask.fullname" . }}
+        kinds:
+          - kind: HTTPRoute
+    {{- end }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "simple-flask.fullname" . }}-route
+  labels:
+    {{- include "simple-flask.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - name: {{ include "simple-flask.fullname" . }}-gw
+      namespace: {{ .Values.traefik.gateway.gatewayNamespace }}
+  hostnames:
+    - {{ .Values.traefik.gateway.host | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: {{ include "simple-flask.fullname" . }}
+          namespace: {{ .Values.traefik.gateway.appNamespace }}
+          port: {{ .Values.service.port }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: ReferenceGrant
+metadata:
+  name: {{ include "simple-flask.fullname" . }}-rg
+  labels:
+    {{- include "simple-flask.labels" . | nindent 4 }}
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: {{ .Values.traefik.gateway.gatewayNamespace }}
+  to:
+    - group: ""
+      kind: Service
+{{- end }}

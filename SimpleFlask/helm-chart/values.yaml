@@ -1,0 +1,75 @@
+replicaCount: 1
+
+image:
+  repository: fureasu346/simple-flask
+  tag: "1.0.1"
+  pullPolicy: IfNotPresent
+
+app:
+  port: 5080
+  logPath: /app-data/log
+  dataPath: /app-data/data
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 50Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+# Affinity options: disabled | hard | soft
+affinity: disabled
+
+# Persistence configuration
+persistence:
+  enabled: false
+  storageClassName: standard
+  accessMode: ReadWriteOnce
+  size: 512Mi
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 5080
+
+# LoadBalancer service (separate from ClusterIP)
+loadBalancer:
+  enabled: false
+
+# Networking: only one of istio/ingress/gateway should be enabled at a time
+istio:
+  enabled: false
+  host: simple-flask.lab.local
+  tls:
+    enabled: false
+    credentialName: simple-flask-tls
+  stickySession:
+    enabled: false
+    # mode: new-cookie | existing-cookie
+    mode: new-cookie
+    cookieName: sticky
+
+nginx:
+  enabled: false
+  host: simple-flask.lab.local
+
+traefik:
+  ingress:
+    enabled: false
+    host: simple-flask.lab.local
+    tls:
+      enabled: false
+      secretName: simple-flask-tls
+    stickySession:
+      enabled: false
+  gateway:
+    enabled: false
+    host: simple-flask.lab.local
+    tls:
+      enabled: false
+      secretName: simple-flask-tls
+    httpPort: 8000
+    httpsPort: 8443
+    gatewayNamespace: traefik
+    appNamespace: lab

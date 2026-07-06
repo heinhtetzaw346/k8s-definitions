@@ -1,0 +1,34 @@
+{{- if .Values.traefik.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "simple-flask.fullname" . }}
+  labels:
+    {{- include "simple-flask.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.traefik.ingress.tls.enabled }}
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    {{- else }}
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    {{- end }}
+spec:
+  ingressClassName: traefik
+  {{- if .Values.traefik.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.traefik.ingress.host }}
+      secretName: {{ .Values.traefik.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.traefik.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "simple-flask.fullname" . }}
+                port:
+                  number: {{ .Values.service.port }}
+{{- end }}
