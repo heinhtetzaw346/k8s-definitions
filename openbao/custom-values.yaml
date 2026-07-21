@@ -1,0 +1,75 @@
+global:
+  tlsDisable: false
+server:
+  gateway:
+    tlsRoute:
+      enabled: true
+      apiVersion: gateway.networking.k8s.io/v1
+      hosts:
+      - "vault.lab.local"
+      parentRefs:
+        - name: openbao-gateway
+          namespace: istio-system
+  extraEnvironmentVars:
+    BAO_CACERT: "/certs/ca.crt"
+  ha:
+    enabled: true
+    replicas: 3
+    raft:
+      enabled: true
+      config: |
+        ui = true
+        
+        listener "tcp" {
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+          tls_cert_file = "/certs/tls.crt"
+          tls_key_file = "/certs/tls.key"
+        }
+
+        storage "raft" {
+          path = "/openbao/data"
+
+          retry_join {
+            leader_api_addr = "https://openbao-0.openbao-internal:8200"
+            leader_ca_cert_file = "/certs/ca.crt"
+          }
+
+          retry_join {
+            leader_api_addr = "https://openbao-1.openbao-internal:8200"
+            leader_ca_cert_file = "/certs/ca.crt"
+          }
+
+          retry_join {
+            leader_api_addr = "https://openbao-2.openbao-internal:8200"
+            leader_ca_cert_file = "/certs/ca.crt"
+          }
+        }
+
+        service_registration "kubernetes" {}
+  volumes:
+    - name: certs
+      secret:
+        secretName: openbao-tls
+  volumeMounts:
+    - mountPath: /certs
+      name: certs
+      readOnly: true
+  dataStorage:
+    enabled: true
+    size: 10Gi
+    mountPath: "/openbao/data"
+    storageClass: standard
+    accessMode: ReadWriteOnce
+ui:
+  enabled: true
+csi:
+  enabled: true
+  volumes:
+    - name: tls
+      secret:
+        secretName: openbao-tls
+  volumeMounts:
+    - name: tls
+      mountPath: "/openbao/tls"
+      readOnly: true
