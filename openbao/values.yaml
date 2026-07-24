@@ -18,7 +18,7 @@ global:
   #   - name: image-pull-secret
 
   # -- TLS for end-to-end encrypted transport
-  tlsDisable: true
+  tlsDisable: false
 
   # -- External openbao server address for the injector and CSI provider to use.
   # Setting this will disable deployment of an OpenBao server.
@@ -466,14 +466,14 @@ server:
   gateway:
     # Configures a TLSRoute for the OpenBao server. This can be enabled independently of the ingress configuration to allow for side-by-side scenarios for migration.
     tlsRoute:
-      enabled: false
+      enabled: true
       labels: {}
       # traffic: external
       annotations: {}
       # external-dns.alpha.kubernetes.io/hostname: chart-example.local
 
-      hosts: []
-        # - chart-example.local
+      hosts:
+        - "vault.lab.local"
 
       # Allows overriding the TLSRoutes apiVersion in case a different version of Gateway API is installed on the cluster.
       apiVersion: gateway.networking.k8s.io/v1alpha3
@@ -484,11 +484,11 @@ server:
 
       # List of ParentRefs. As the helm chart configures no gateways itself,
       # this should be set to at least one gateway with one or more TLS listeners
-      parentRefs: []
-        # - name: my-gw
-        #   namespace: gateway-namespace
-        #   # sectionName is optional to fix to a specific listener
-        #   sectionName: listener-name
+      parentRefs:
+       - name: openbao-gateway
+         namespace: istio-system
+         # sectionName is optional to fix to a specific listener
+         #sectionName: listener-name
 
     # Configures a HTTPRoute for the OpenBao server. This can be enabled independently of the ingress configuration to allow for side-by-side scenarios for migration.
     # WARNING: Terminating TLS before reaching the OpenBao Server is not recommended and may break things like certificate authentication. Prefer usage of `TLSRoute`.
