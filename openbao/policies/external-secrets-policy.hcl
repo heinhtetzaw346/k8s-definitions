@@ -1,8 +1,8 @@
 # external-secrets-policy.hcl
-path "secrets/data/flux-gitops-values/*" {
+path "secret/data/flux-gitops-values/*" {
   capabilities = ["read", "list"]
 }
 
-path "secrets/metadata/flux-gitops-values/*" {
+path "secret/metadata/flux-gitops-values/*" {
   capabilities = ["list"]
 }

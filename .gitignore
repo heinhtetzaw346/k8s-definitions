@@ -2,3 +2,4 @@ wso2/ingress-tls-certs/
 Keycloak/i-deployment/tls/
 Keycloak/eks-deployment/tls/
 FlaskRW/tls/
+.agent-files
