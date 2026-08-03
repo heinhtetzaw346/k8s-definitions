@@ -1,0 +1,36 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: simple-flask-gw
+  namespace: envoy-gateway-system
+spec:
+  gatewayClassName: envoy
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "simple-flask.lab.local"
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: simple-flask-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway: simple-flask
+        kinds:
+          - kind: HTTPRoute 
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: "simple-flask.lab.local"
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway: simple-flask
+        kinds:
+          - kind: HTTPRoute 
