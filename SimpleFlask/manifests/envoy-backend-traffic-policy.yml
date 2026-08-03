@@ -1,0 +1,21 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: simple-flask-cookie-affinity
+  namespace: lab
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: simple-flask-route
+  loadBalancer:
+    type: ConsistentHash
+    consistentHash:
+      type: Cookie
+      cookie:
+        name: ENVOY_SESSION
+        ttl: 86400s
+        attributes:
+          Path: "/"
+          HttpOnly: "true"
+          Secure: "false"
