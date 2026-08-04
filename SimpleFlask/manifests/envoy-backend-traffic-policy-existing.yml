@@ -13,5 +13,4 @@ spec:
     consistentHash:
       type: Cookie
       cookie:
-        # Provide the exact name of the cookie your application sets
-        name: MY_APP_SESSION 
+        name: session
