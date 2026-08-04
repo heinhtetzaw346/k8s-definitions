@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-openbao-gateway
+  namespace: envoy-gateway-system
+spec:
+  gatewayClassName: envoy
+  listeners:
+  - name: https-ui
+    hostname: "vault-ui.lab.local"
+    port: 443
+    protocol: HTTPS
+    allowedRoutes:
+      namespaces:
+        from: Selector
+        selector:
+          matchLabels:
+            app-namespace: vault-system
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: vault-ui-tls

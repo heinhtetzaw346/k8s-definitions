@@ -3,7 +3,7 @@ global:
 server:
   gateway:
     tlsRoute:
-      enabled: true
+      enabled: false
       apiVersion: gateway.networking.k8s.io/v1
       hosts:
       - "vault.lab.local"
@@ -12,6 +12,7 @@ server:
           namespace: istio-system
   extraEnvironmentVars:
     BAO_CACERT: "/certs/ca.crt"
+    VAULT_CACERT: "/certs/ca.crt"
   ha:
     enabled: true
     replicas: 3
@@ -31,17 +32,17 @@ server:
           path = "/openbao/data"
 
           retry_join {
-            leader_api_addr = "https://openbao-0.openbao-internal:8200"
+            leader_api_addr = "https://openbao-0.openbao-internal.vault-system:8200"
             leader_ca_cert_file = "/certs/ca.crt"
           }
 
           retry_join {
-            leader_api_addr = "https://openbao-1.openbao-internal:8200"
+            leader_api_addr = "https://openbao-1.openbao-internal.vault-system:8200"
             leader_ca_cert_file = "/certs/ca.crt"
           }
 
           retry_join {
-            leader_api_addr = "https://openbao-2.openbao-internal:8200"
+            leader_api_addr = "https://openbao-2.openbao-internal.vault-system:8200"
             leader_ca_cert_file = "/certs/ca.crt"
           }
         }
@@ -64,7 +65,7 @@ server:
 ui:
   enabled: true
 csi:
-  enabled: true
+  enabled: false
   volumes:
     - name: tls
       secret:
