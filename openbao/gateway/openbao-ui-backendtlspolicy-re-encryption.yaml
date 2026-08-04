@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: openbao-ui-re-encryption
+  namespace: vault-system
+spec:
+  targetRefs:
+    - group: ""
+      kind: Service
+      name: openbao-active
+  validation:
+    hostname: vault.lab.local
+    caCertificateRefs:
+      - group: ""
+        kind: ConfigMap
+        name: openbao-ca
