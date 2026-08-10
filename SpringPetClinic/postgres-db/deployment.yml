@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springpetclinic-db
+spec:
+  selector:
+    matchLabels:
+      app: springpetclinic-db
+  revisionHistoryLimit: 5
+  replicas: 1
+  template:
+    metadata:
+      name: springpetclinic-db
+      labels:
+        app: springpetclinic-db
+    spec:
+      containers:
+        - name: springpetclinic-db
+          image: postgres:17-alpine3.22
+          env:
+            - name: POSTGRES_DB
+              value: springpetclinic
+            - name: POSTGRES_USER
+              value: springpetclinic
+            - name: POSTGRES_PASSWORD
+              value: springpetclinicpswd
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: springpetclinic-db-data

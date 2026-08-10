@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: springpetclinic
+spec:
+  hosts:
+    - "springpetclinic.lab.local"
+  gateways:
+    - springpetclinic
+  http:
+    - route:
+      - destination:
+          host: springpetclinic.lab.svc.cluster.local
+          port:
+            number: 80

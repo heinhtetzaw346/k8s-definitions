@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: springpetclinic
+  labels:
+    app: springpetclinic
+spec:
+  selector:
+    matchLabels:
+      app: springpetclinic
+  revisionHistoryLimit: 5
+  replicas: 1
+  template:
+    metadata:
+      name: springpetclinic
+      labels:
+        app: springpetclinic
+    spec:
+      containers:
+        - name: springpetclinic
+          image: docker.io/fureasu346/springpetclinic:3.5.0
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: postgres
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://springpetclinic-db.lab.svc.cluster.local:5432/springpetclinic
+            - name: SPRING_DATASOURCE_USERNAME
+              value: springpetclinic
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: springpetclinicpswd
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 10
