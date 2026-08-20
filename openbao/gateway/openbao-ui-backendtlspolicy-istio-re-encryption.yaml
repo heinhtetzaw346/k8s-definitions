@@ -9,7 +9,7 @@ spec:
       kind: Service
       name: openbao-active
   validation:
-    hostname: vault.lab.local
+    hostname: openbao-active.vault-system
     caCertificateRefs:
       - group: ""
         kind: ConfigMap
