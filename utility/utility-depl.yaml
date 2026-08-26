@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility
+spec:
+  selector: 
+    matchLabels:
+      app: utility
+  revisionHistoryLimit: 5
+  replicas: 4
+  template:
+    metadata:
+      name: utility
+      labels:
+        app: utility
+    spec:
+      containers:
+        - name: utility
+          image: fureasu346/utility:v2
+          securityContext:
+            capabilities:
+              add:
+                - NET_RAW
+          command:
+            - bash
+          args:
+            - -c
+            - while :; do sleep 1; done
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - utility
+              topologyKey: "kubernetes.io/hostname"
