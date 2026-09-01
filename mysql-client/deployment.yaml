@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-client
+  labels:
+    app: mysql-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql-client
+  template:
+    metadata:
+      labels:
+        app: mysql-client
+    spec:
+      containers:
+      - name: mysql-client
+        image: quay.io/fureasu346/mysql:9.7.2
+        imagePullPolicy: IfNotPresent
+        command:
+        - sleep
+        - "infinity"
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 50m
+            memory: 64Mi
