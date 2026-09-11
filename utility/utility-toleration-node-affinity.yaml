@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: utility-testing
+spec:
+  selector: 
+    matchLabels:
+      app: utility
+  revisionHistoryLimit: 5
+  replicas: 1
+  template:
+    metadata:
+      name: utility
+      labels:
+        app: utility
+    spec:
+      tolerations:
+        - key: testing
+          value: "true"
+          operator: Equal
+          effect: NoSchedule
+#      hostAliases:
+#        - ip: 10.240.11.230
+#          hostnames:
+#            - "domain"
+      containers:
+        - name: utility
+          image: quay.io/fureasu346/utility:v2
+          securityContext:
+            capabilities:
+              add:
+                - NET_RAW
+          command:
+            - bash
+          args:
+            - -c
+            - while :; do sleep 1; done
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - utility
+              topologyKey: "kubernetes.io/hostname"
+        nodeAffinity: 
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: kubernetes.io/hostname
+                  values: 
+                    - k8sdevworker44
+                  operator: In
