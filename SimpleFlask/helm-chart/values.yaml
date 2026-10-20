@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: fureasu346/simple-flask
-  tag: "1.0.1"
+  tag: "1.0.2"
   pullPolicy: IfNotPresent
 
 app:
@@ -31,7 +31,7 @@ persistence:
 # Service configuration
 service:
   type: ClusterIP
-  port: 5080
+  port: 80
 
 # LoadBalancer service (separate from ClusterIP)
 loadBalancer:
@@ -39,7 +39,7 @@ loadBalancer:
 
 # Networking: only one of istio/ingress/gateway should be enabled at a time
 istio:
-  enabled: false
+  enabled: true
   host: simple-flask.lab.local
   tls:
     enabled: false
