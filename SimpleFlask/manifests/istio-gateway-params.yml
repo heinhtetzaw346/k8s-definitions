@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-params
+data:
+  horizontalPodAutoscaler: |
+    spec:
+      minReplicas: 1
+      maxReplicas: 5
+
+  service: |
+    metadata:
+      annotations:
+        test.cloud.loadbalancer: "test-loadbalancer"

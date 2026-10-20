@@ -1,0 +1,26 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: simple-flask-route
+spec:
+  parentRefs:
+    - name: simple-flask-gw
+      namespace: istio-system
+      sectionName: http
+    - name: simple-flask-gw
+      namespace: istio-system
+      sectionName: https
+    - name: simple-flask-gw-test
+      namespace: istio-system
+      sectionName: http
+  hostnames:
+    - "simple-flask.lab.local"
+    - "simple-flask-test.lab.local"
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: simple-flask
+          port: 5080
